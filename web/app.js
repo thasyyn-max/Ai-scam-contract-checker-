@@ -55,9 +55,8 @@ function shell() {
   const brand = el('div', 'brand');
   const link = el('a');
   link.href = '/';
-  link.setAttribute('aria-label', 'Token Risk Scanner home');
-  link.innerHTML = '<img src="/logo.svg" alt="" width="22" height="27">';
-  link.appendChild(el('h1', null, 'Token Risk Scanner'));
+  link.setAttribute('aria-label', 'RugSonar home');
+  link.innerHTML = '<img class="lockup" src="/logo-full.svg" alt="RugSonar">';
   brand.appendChild(link);
   wrap.appendChild(brand);
 

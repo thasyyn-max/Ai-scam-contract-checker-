@@ -1,12 +1,12 @@
 # Deploying Token Risk Scanner (Cloudflare Tunnel)
 
 The app (API + frontend) runs from one container on your droplet. A **Cloudflare
-Tunnel** puts it online at `https://scanner.yourdomain.com` **without opening any
+Tunnel** puts it online at `https://rugsonar.com` **without opening any
 ports** — so it co-hosts safely next to another app, and the origin IP stays hidden.
 
 ```
 Droplet:      [ your other app on 80/443 ]   [ scanner app :3000 ]   [ cloudflared ]
-Cloudflare:   scanner.yourdomain.com  --tunnel-->  app:3000
+Cloudflare:   rugsonar.com  --tunnel-->  app:3000
               (also caches static assets + /og images at the edge)
 ```
 
@@ -29,7 +29,7 @@ Cloudflare:   scanner.yourdomain.com  --tunnel-->  app:3000
 3. On the "Install and run" screen, **copy the token** (the long string after
    `--token`). You don't need to run the shown command — the container does it.
 4. Add a **Public Hostname**:
-   - Subdomain `scanner`, Domain `yourdomain.com`
+   - Subdomain (leave blank), Domain `rugsonar.com`  ← serves the apex
    - Type **HTTP**, URL **`app:3000`**  ← the compose service name + port
    - Save.
 
@@ -39,11 +39,11 @@ Cloudflare:   scanner.yourdomain.com  --tunnel-->  app:3000
 git clone https://github.com/thasyyn-max/Ai-scam-contract-checker-.git
 cd Ai-scam-contract-checker-
 cp .env.example .env
-nano .env     # set CLOUDFLARE_TUNNEL_TOKEN, PUBLIC_BASE_URL=https://scanner.yourdomain.com, keys
+nano .env     # set CLOUDFLARE_TUNNEL_TOKEN, PUBLIC_BASE_URL=https://rugsonar.com, keys
 docker compose up -d --build
 ```
 
-Give it ~30 seconds, then visit `https://scanner.yourdomain.com`. Cloudflare
+Give it ~30 seconds, then visit `https://rugsonar.com`. Cloudflare
 issues the HTTPS cert automatically — you're live.
 
 ## Step 3 — Cache the viral traffic (recommended)
@@ -69,7 +69,7 @@ The scan cache + history persist in the `scandata` volume across restarts.
 ## Notes
 
 - **No inbound ports** are opened — you can firewall the droplet to allow only SSH.
-- **`PUBLIC_BASE_URL`** must be your `https://scanner.yourdomain.com`, or share
+- **`PUBLIC_BASE_URL`** must be your `https://rugsonar.com`, or share
   cards will show `localhost`.
 - **Co-hosting:** this stack touches no host ports, so it runs alongside your
   existing app with zero conflict. Cloudflare's edge cache also absorbs traffic

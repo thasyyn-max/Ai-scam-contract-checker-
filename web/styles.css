@@ -63,10 +63,9 @@ body {
 .wrap { max-width: 640px; margin: 0 auto; padding: clamp(40px, 7vw, 84px) 20px 88px; }
 
 /* ── header ─────────────────────────────────────────── */
-.brand { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 16px; }
-.brand a { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
-.brand img { height: 30px; width: auto; display: block; }
-.brand h1 { font-size: 21px; font-weight: 700; letter-spacing: -0.4px; }
+.brand { display: flex; justify-content: center; margin-bottom: 18px; }
+.brand a { display: block; text-decoration: none; }
+.brand img.lockup { height: 36px; width: auto; display: block; }
 .tagline { text-align: center; color: var(--muted); font-size: 16px; max-width: 46ch; margin: 0 auto 30px; line-height: 1.55; }
 
 /* ── search ─────────────────────────────────────────── */
