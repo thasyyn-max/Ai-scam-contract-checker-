@@ -1,7 +1,15 @@
-# One-command production stack: the app + Caddy (automatic HTTPS via Let's Encrypt).
-# 1. Copy .env.example -> .env and fill in DOMAIN + keys.
-# 2. Point your domain's A record at the droplet.
-# 3. docker compose up -d --build
+# Co-hostable production stack: the scanner app + a Cloudflare Tunnel.
+#
+# No inbound ports are opened on the droplet. cloudflared makes an OUTBOUND
+# connection to Cloudflare, which serves https://scanner.yourdomain.com and
+# routes it to app:3000 over the internal network. This avoids the 80/443
+# conflict with any other app already on the droplet, and hides the origin IP.
+#
+# Setup (see DEPLOY.md):
+#   1. Create a tunnel in Cloudflare  (Zero Trust > Networks > Tunnels).
+#   2. Add a Public Hostname -> Service: HTTP  app:3000  and copy the token.
+#   3. cp .env.example .env  and set CLOUDFLARE_TUNNEL_TOKEN, PUBLIC_BASE_URL, keys.
+#   4. docker compose up -d --build
 
 services:
   app:
@@ -16,22 +24,12 @@ services:
     expose:
       - "3000"
 
-  caddy:
-    image: caddy:2
+  cloudflared:
+    image: cloudflare/cloudflared:latest
     restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    environment:
-      - DOMAIN=${DOMAIN}
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
     depends_on:
       - app
 
 volumes:
   scandata:
-  caddy_data:
-  caddy_config:

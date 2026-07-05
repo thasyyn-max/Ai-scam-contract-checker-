@@ -1,6 +1,0 @@
-# Caddy reads {$DOMAIN} from the environment (set in .env via docker-compose).
-# It provisions and renews a Let's Encrypt certificate automatically.
-{$DOMAIN} {
-	encode zstd gzip
-	reverse_proxy app:3000
-}
