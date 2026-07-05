@@ -258,13 +258,24 @@ function renderResult(output, result) {
   card.focus({ preventScroll: true });
 }
 
+// retry a THROWN fetch once (transient blip / server restart), not HTTP errors
+async function fetchWithRetry(url, tries = 2) {
+  for (let i = 0; ; i++) {
+    try { return await fetch(url); }
+    catch (e) {
+      if (i >= tries - 1) throw e;
+      await new Promise((r) => setTimeout(r, 700));
+    }
+  }
+}
+
 async function runScan(output, url) {
   output.innerHTML = '';
   output.appendChild(skeleton());
   const status = el('div', 'status', 'Querying security data sources…');
   output.appendChild(status);
   try {
-    const res = await fetch(url);
+    const res = await fetchWithRetry(url);
     if (res.status === 429) {
       output.innerHTML = '';
       const err = el('div', 'error', 'Too many scans from your connection — please wait a minute and try again.');
