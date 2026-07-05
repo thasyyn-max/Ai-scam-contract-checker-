@@ -19,10 +19,28 @@ const EXAMPLES = [
 // tiny inline icons (Lucide-style strokes) — no emoji per design system
 const ICON = {
   shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.7 8.9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1 1 0 0 1 1.3 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
   copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
   share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>',
   code: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
 };
+
+// data-source display names for the trust row (credibility signal)
+const SOURCE_NAME = {
+  'goplus': 'GoPlus', 'honeypot.is': 'Honeypot.is', 'etherscan': 'Etherscan',
+  'geckoterminal': 'GeckoTerminal', 'solana-rpc': 'Solana RPC', 'rugcheck': 'RugCheck',
+};
+
+function relTime(iso) {
+  const s = Math.max(0, (Date.now() - Date.parse(iso)) / 1000);
+  if (!Number.isFinite(s)) return '';
+  if (s < 60) return 'just now';
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
 
 function el(tag, cls, text) {
   const node = document.createElement(tag);
@@ -75,6 +93,13 @@ function shell() {
   output.setAttribute('aria-live', 'polite');
   wrap.appendChild(output);
 
+  const method = el('p', 'method');
+  method.innerHTML =
+    '<strong>How scoring works.</strong> Deterministic checks run across multiple ' +
+    'independent security sources; each red flag carries the exact evidence behind it. ' +
+    'The AI explains the findings — it never sets the score.';
+  wrap.appendChild(method);
+
   const footer = el('footer', 'site');
   footer.textContent =
     'Automated technical analysis of token contracts — not financial advice, not an endorsement. ' +
@@ -123,8 +148,22 @@ function renderResult(output, result) {
   token.appendChild(el('span', 'addr', result.address));
   meta.appendChild(token);
 
+  // trust row — which sources were checked, and when
+  const sources = (result.checks || []).filter((c) => c.ok).map((c) => SOURCE_NAME[c.source] || c.source);
+  if (sources.length) {
+    const trust = el('div', 'trust');
+    trust.innerHTML = ICON.check;
+    trust.appendChild(document.createTextNode('Checked · ' + sources.join(' · ')));
+    const when = relTime(result.scannedAt);
+    if (when) {
+      trust.appendChild(el('span', 'sep', '·'));
+      trust.appendChild(el('span', 'time', 'Scanned ' + when));
+    }
+    meta.appendChild(trust);
+  }
+
   if (result.partial) {
-    const p = el('div', 'partial', 'Partial scan — some sources were down; score reflects the checks that ran');
+    const p = el('div', 'partial', 'Partial scan — some sources were unavailable; score reflects the checks that ran');
     meta.appendChild(p);
   }
   head.appendChild(meta);
