@@ -1,0 +1,19 @@
+{
+  "name": "ai-scam-contract-checker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Paste a token address, get a risk score with a plain-English AI explanation.",
+  "workspaces": [
+    "shared",
+    "api"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w api",
+    "start": "npm run start -w api",
+    "build": "npm run build -w shared && npm run build -w api",
+    "test": "npm run test -w shared && npm run test -w api"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
