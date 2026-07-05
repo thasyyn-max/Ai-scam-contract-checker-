@@ -13,8 +13,12 @@ import { resolveTarget, scanToken } from './scan.ts';
 const app = Fastify({ logger: true });
 const webDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'web');
 
-await app.register(rateLimit, { max: 30, timeWindow: '1 minute' });
+// Rate-limit only the expensive scan/image routes — NOT static assets or the
+// permalink HTML, so a normal page load (many asset requests) never trips it.
+await app.register(rateLimit, { global: false });
 await app.register(fastifyStatic, { root: webDir, prefix: '/' });
+
+const scanLimit = { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } };
 
 async function getOrScan(chainId: string, address: string): Promise<ScanResult | { error: string }> {
   const chain = chainById(chainId);
@@ -32,7 +36,7 @@ async function getOrScan(chainId: string, address: string): Promise<ScanResult |
 app.get('/healthz', async () => ({ ok: true }));
 
 // auto-detect chain: /v1/scan?address=...
-app.get<{ Querystring: { address?: string } }>('/v1/scan', async (req, reply) => {
+app.get<{ Querystring: { address?: string } }>('/v1/scan', scanLimit, async (req, reply) => {
   const address = req.query.address;
   if (!address) return reply.code(400).send({ error: 'address query parameter required' });
 
@@ -42,14 +46,14 @@ app.get<{ Querystring: { address?: string } }>('/v1/scan', async (req, reply) =>
   return getOrScan(target.chain.id, target.address);
 });
 
-app.get<{ Params: { chain: string; address: string } }>('/v1/scan/:chain/:address', async (req, reply) => {
+app.get<{ Params: { chain: string; address: string } }>('/v1/scan/:chain/:address', scanLimit, async (req, reply) => {
   const result = await getOrScan(req.params.chain, req.params.address);
   if ('error' in result) return reply.code(400).send(result);
   return result;
 });
 
 // OG share-card image
-app.get<{ Params: { chain: string; address: string } }>('/og/:chain/:address.png', async (req, reply) => {
+app.get<{ Params: { chain: string; address: string } }>('/og/:chain/:address.png', scanLimit, async (req, reply) => {
   const result = await getOrScan(req.params.chain, req.params.address);
   if ('error' in result) return reply.code(404).send(result);
   const host = config.publicBaseUrl.replace(/^https?:\/\//, '');

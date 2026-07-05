@@ -11,9 +11,9 @@ const VERDICT_LABEL = {
 };
 
 const EXAMPLES = [
-  { label: 'WETH', address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' },
-  { label: 'BONK', address: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263' },
-  { label: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7' },
+  { label: 'WETH', logo: '/tokens/weth.png', address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' },
+  { label: 'BONK', logo: '/tokens/bonk.png', address: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263' },
+  { label: 'USDT', logo: '/tokens/usdt.png', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7' },
 ];
 
 // tiny inline icons (Lucide-style strokes) — no emoji per design system
@@ -82,9 +82,15 @@ function shell() {
   const examples = el('div', 'examples');
   examples.appendChild(el('span', 'lbl', 'Try:'));
   for (const ex of EXAMPLES) {
-    const chip = el('button', 'chip', ex.label);
+    const chip = el('button', 'chip');
     chip.type = 'button';
     chip.dataset.address = ex.address;
+    const img = el('img');
+    img.src = ex.logo;
+    img.alt = '';
+    img.loading = 'lazy';
+    chip.appendChild(img);
+    chip.appendChild(document.createTextNode(ex.label));
     examples.appendChild(chip);
   }
   wrap.appendChild(examples);
@@ -144,11 +150,23 @@ function renderResult(output, result) {
   pill.appendChild(el('span', 'pill-txt', VERDICT_LABEL[result.verdict] || result.verdict));
   meta.appendChild(pill);
 
-  const tokenName = (result.facts.name || 'Unknown token') + (result.facts.symbol ? ` · $${result.facts.symbol}` : '');
   const token = el('div', 'token');
-  token.appendChild(document.createTextNode(`${tokenName} · ${result.chainName}`));
-  token.appendChild(el('br'));
-  token.appendChild(el('span', 'addr', result.address));
+  if (result.facts.logoUrl) {
+    const logo = el('img', 'tk');
+    logo.src = result.facts.logoUrl;
+    logo.alt = '';
+    logo.loading = 'lazy';
+    logo.addEventListener('error', () => logo.remove());
+    token.appendChild(logo);
+  }
+  const label = el('div');
+  const nm = (result.facts.name || 'Unknown token') + (result.facts.symbol ? ` · $${result.facts.symbol}` : '');
+  const nameLine = el('span', 'name', nm);
+  label.appendChild(nameLine);
+  label.appendChild(document.createTextNode(` · ${result.chainName}`));
+  label.appendChild(el('br'));
+  label.appendChild(el('span', 'addr', result.address));
+  token.appendChild(label);
   meta.appendChild(token);
 
   // trust row — which sources were checked, and when
@@ -247,6 +265,13 @@ async function runScan(output, url) {
   output.appendChild(status);
   try {
     const res = await fetch(url);
+    if (res.status === 429) {
+      output.innerHTML = '';
+      const err = el('div', 'error', 'Too many scans from your connection — please wait a minute and try again.');
+      err.setAttribute('role', 'alert');
+      output.appendChild(err);
+      return;
+    }
     const data = await res.json();
     if (!res.ok || data.error) {
       output.innerHTML = '';

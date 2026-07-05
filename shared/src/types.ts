@@ -42,6 +42,8 @@ export interface CheckStatus {
 export interface TokenFacts {
   name?: string;
   symbol?: string;
+  /** token logo URL (from market metadata), for display */
+  logoUrl?: string;
 
   // sellability / taxes (simulation-backed where available)
   isHoneypot?: boolean;

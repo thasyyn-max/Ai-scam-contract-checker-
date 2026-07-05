@@ -33,6 +33,18 @@ export const geckoCollector: Collector = (chain, address, ctx) =>
 
     facts.liquidityUsd = Math.round(liquidity);
     if (earliest !== undefined) facts.tokenAgeHours = (Date.now() - earliest) / 3_600_000;
+
+    // token logo + verified name/symbol (best-effort — never fail the collector over it)
+    try {
+      const meta = await fetchJson(`${BASE}/networks/${chain.geckoNetwork}/tokens/${address}`);
+      const a = meta?.data?.attributes ?? {};
+      if (a.name) facts.name = a.name;
+      if (a.symbol) facts.symbol = a.symbol;
+      if (typeof a.image_url === 'string' && a.image_url.startsWith('http') && !a.image_url.includes('missing')) {
+        facts.logoUrl = a.image_url;
+      }
+    } catch { /* logo is optional */ }
+
     return facts;
   });
 
