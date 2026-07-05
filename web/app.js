@@ -159,8 +159,8 @@ function renderResult(output, result) {
     token.appendChild(logo);
   }
   const label = el('div');
-  const nm = (result.facts.name || 'Unknown token') + (result.facts.symbol ? ` · $${result.facts.symbol}` : '');
-  const nameLine = el('span', 'name', nm);
+  const tokenName = (result.facts.name || 'Unknown token') + (result.facts.symbol ? ` · $${result.facts.symbol}` : '');
+  const nameLine = el('span', 'name', tokenName);
   label.appendChild(nameLine);
   label.appendChild(document.createTextNode(` · ${result.chainName}`));
   label.appendChild(el('br'));
@@ -273,29 +273,32 @@ async function runScan(output, url) {
   output.appendChild(skeleton());
   const status = el('div', 'status', 'Querying security data sources…');
   output.appendChild(status);
-  try {
-    const res = await fetchWithRetry(url);
-    if (res.status === 429) {
-      output.innerHTML = '';
-      const err = el('div', 'error', 'Too many scans from your connection — please wait a minute and try again.');
-      err.setAttribute('role', 'alert');
-      output.appendChild(err);
-      return;
-    }
-    const data = await res.json();
-    if (!res.ok || data.error) {
-      output.innerHTML = '';
-      const err = el('div', 'error', data.error || `Scan failed (${res.status})`);
-      err.setAttribute('role', 'alert');
-      output.appendChild(err);
-      return;
-    }
-    renderResult(output, data);
-  } catch {
+
+  function showError(msg) {
     output.innerHTML = '';
-    const err = el('div', 'error', 'Network error — is the API running?');
+    const err = el('div', 'error', msg);
     err.setAttribute('role', 'alert');
     output.appendChild(err);
+  }
+
+  // 1) fetch + parse — only genuine network/parse failures are "network errors"
+  let data;
+  try {
+    const res = await fetchWithRetry(url);
+    if (res.status === 429) return showError('Too many scans from your connection — please wait a minute and try again.');
+    data = await res.json();
+    if (!res.ok || data.error) return showError(data.error || `Scan failed (${res.status})`);
+  } catch (e) {
+    console.error('scan request failed:', e);
+    return showError('Network error — is the API running?');
+  }
+
+  // 2) render — a bug here surfaces honestly, never disguised as a network error
+  try {
+    renderResult(output, data);
+  } catch (e) {
+    console.error('render failed:', e);
+    showError('Something went wrong displaying the result.');
   }
 }
 
