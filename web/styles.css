@@ -2,7 +2,14 @@
    Blue brand-led (from the logo) with soft depth and real token imagery, while
    keeping the credibility signals. Muted verdict colors stay the status chroma. */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+/* Self-hosted Inter (variable) — no external font dependency */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/inter-var.woff2') format('woff2');
+}
 
 :root {
   --bg: #f6f8fc;
