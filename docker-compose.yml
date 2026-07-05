@@ -1,0 +1,37 @@
+# One-command production stack: the app + Caddy (automatic HTTPS via Let's Encrypt).
+# 1. Copy .env.example -> .env and fill in DOMAIN + keys.
+# 2. Point your domain's A record at the droplet.
+# 3. docker compose up -d --build
+
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3000
+    volumes:
+      - scandata:/app/data
+    expose:
+      - "3000"
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  scandata:
+  caddy_data:
+  caddy_config:

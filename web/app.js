@@ -101,9 +101,12 @@ function shell() {
   wrap.appendChild(method);
 
   const footer = el('footer', 'site');
-  footer.textContent =
+  footer.appendChild(document.createTextNode(
     'Automated technical analysis of token contracts — not financial advice, not an endorsement. ' +
-    'A high score means no red flags were found in the checks that ran, not that a token is safe. Always DYOR.';
+    'A high score means no red flags were found in the checks that ran, not that a token is safe. Always DYOR. '));
+  const terms = el('a', null, 'Terms & disclaimer');
+  terms.href = '/terms.html';
+  footer.appendChild(terms);
   wrap.appendChild(footer);
 
   app.appendChild(wrap);

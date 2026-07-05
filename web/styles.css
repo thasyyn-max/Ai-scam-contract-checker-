@@ -186,6 +186,8 @@ form.scan button:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(36, 8
 .method { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 36px; line-height: 1.7; max-width: 52ch; margin-inline: auto; }
 .method strong { color: var(--ink); font-weight: 600; }
 footer.site { text-align: center; color: var(--dim); font-size: 12px; margin-top: 14px; line-height: 1.7; max-width: 54ch; margin-inline: auto; }
+footer.site a { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
+footer.site a:hover { color: var(--ink); }
 
 /* ── responsive ─────────────────────────────────────── */
 @media (max-width: 520px) {
