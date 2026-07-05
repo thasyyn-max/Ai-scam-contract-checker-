@@ -78,6 +78,7 @@ app.get<{ Params: { chain: string; address: string } }>('/t/:chain/:address', as
 <title>${title}</title>
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#f7f8fa">
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
 <meta property="og:title" content="${title}">
 <meta property="og:description" content="Risk score with evidence — what the contract owner can do to you, in plain English.">
 <meta property="og:image" content="${ogImage}">

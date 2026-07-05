@@ -56,7 +56,7 @@ function shell() {
   const link = el('a');
   link.href = '/';
   link.setAttribute('aria-label', 'Token Risk Scanner home');
-  link.innerHTML = ICON.shield;
+  link.innerHTML = '<img src="/logo.svg" alt="" width="22" height="27">';
   link.appendChild(el('h1', null, 'Token Risk Scanner'));
   brand.appendChild(link);
   wrap.appendChild(brand);
