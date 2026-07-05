@@ -126,9 +126,14 @@ test('verdict bands', () => {
   assert.equal(verdictForScore(100), 'no-red-flags');
 });
 
-test('address detection: EVM vs Solana vs invalid', () => {
+test('address detection: EVM vs Solana vs Tron vs invalid', () => {
   assert.equal(detectAddressKind('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'), 'evm'); // USDC
   assert.equal(detectAddressKind('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'), 'solana'); // USDC SPL
+  // Tron T… base58check (34 chars) — must win over the Solana rule despite both being base58
+  assert.equal(detectAddressKind('TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'), 'tron'); // USDT-TRON
+  assert.equal(detectAddressKind('TCFLL5dx5ZJdKnWuesXxi1VPwjLVmWZZy9'), 'tron'); // JST
+  // a full-length (44-char) Solana mint that starts with 'T' is still Solana, not Tron
+  assert.equal(detectAddressKind('TNEDEr6xU4qUXW6oepXKZgKpEHtxLZWDkXbAqCUbUt1z'), 'solana');
   assert.equal(detectAddressKind('0x123'), 'invalid');
   assert.equal(detectAddressKind('hello world'), 'invalid');
   assert.equal(detectAddressKind('0OIl111111111111111111111111111111111111111'), 'invalid');

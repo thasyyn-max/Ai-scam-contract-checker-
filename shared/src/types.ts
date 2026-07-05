@@ -1,4 +1,4 @@
-export type ChainKind = 'evm' | 'solana';
+export type ChainKind = 'evm' | 'solana' | 'tron';
 
 export interface ChainInfo {
   /** our stable slug, used in URLs: eth, bsc, base, solana, polygon, arbitrum, optimism, avalanche */

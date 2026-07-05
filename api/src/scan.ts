@@ -6,6 +6,7 @@ import { goplusCollector } from './collectors/goplus.ts';
 import { honeypotIsCollector } from './collectors/honeypotis.ts';
 import { rugcheckCollector } from './collectors/rugcheck.ts';
 import { solanaRpcCollector } from './collectors/solana.ts';
+import { tronscanCollector } from './collectors/tronscan.ts';
 import type { Collector, CollectorContext, CollectorResult } from './collectors/types.ts';
 import { explainResult } from './explain.ts';
 
@@ -18,6 +19,11 @@ import { explainResult } from './explain.ts';
 function collectorsFor(chain: ChainInfo): Collector[] {
   if (chain.kind === 'solana') {
     return [geckoCollector, goplusCollector, rugcheckCollector, solanaRpcCollector];
+  }
+  if (chain.kind === 'tron') {
+    // No Honeypot.is / Etherscan on Tron — GoPlus for security flags, TronScan for
+    // verification + age. gecko still first (fills pools for holder math).
+    return [geckoCollector, goplusCollector, tronscanCollector];
   }
   const list: Collector[] = [geckoCollector, goplusCollector, etherscanCollector];
   if (chain.depth === 'deep') list.push(honeypotIsCollector);
@@ -85,7 +91,7 @@ export interface ResolvedTarget {
 export async function resolveTarget(address: string, chainHint?: string): Promise<ResolvedTarget | string> {
   const trimmed = address.trim();
   const kind = detectAddressKind(trimmed);
-  if (kind === 'invalid') return 'Not a valid token address (expected 0x… EVM address or Solana mint)';
+  if (kind === 'invalid') return 'Not a valid token address (expected 0x… EVM address, Solana mint, or Tron T… address)';
 
   if (chainHint) {
     const chain = chainById(chainHint);
@@ -95,6 +101,7 @@ export async function resolveTarget(address: string, chainHint?: string): Promis
   }
 
   if (kind === 'solana') return { chain: chainById('solana')!, address: trimmed };
+  if (kind === 'tron') return { chain: chainById('tron')!, address: trimmed };
 
   // EVM without a hint: find where the deepest pool lives
   try {

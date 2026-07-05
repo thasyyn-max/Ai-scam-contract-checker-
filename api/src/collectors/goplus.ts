@@ -16,7 +16,8 @@ export const goplusCollector: Collector = (chain, address, ctx) =>
 async function evm(chain: ChainInfo, address: string, pools: Set<string>): Promise<Partial<TokenFacts>> {
   const url = `${BASE}/token_security/${chain.goPlusId}?contract_addresses=${address}`;
   const json = await fetchJson(url);
-  const entry = json?.result?.[address.toLowerCase()];
+  // EVM keys are lowercased by GoPlus; Tron base58 is case-sensitive and returned as-is.
+  const entry = json?.result?.[address.toLowerCase()] ?? json?.result?.[address];
   if (!entry) throw new Error('token not indexed by GoPlus');
 
   const facts: Partial<TokenFacts> = {
