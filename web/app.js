@@ -105,6 +105,10 @@ function shell() {
     'The AI explains the findings — it never sets the score.';
   wrap.appendChild(method);
 
+  const apiCta = el('a', 'api-cta', 'API for developers →');
+  apiCta.href = '/api.html';
+  wrap.appendChild(apiCta);
+
   const footer = el('footer', 'site');
   footer.appendChild(document.createTextNode(
     'Automated technical analysis of token contracts — not financial advice, not an endorsement. ' +
@@ -112,10 +116,6 @@ function shell() {
   const terms = el('a', null, 'Terms & disclaimer');
   terms.href = '/terms.html';
   footer.appendChild(terms);
-  footer.appendChild(document.createTextNode(' · '));
-  const apiLink = el('a', null, 'API for developers');
-  apiLink.href = '/api.html';
-  footer.appendChild(apiLink);
   wrap.appendChild(footer);
 
   app.appendChild(wrap);
