@@ -20,6 +20,9 @@ export const config = {
   heliusApiKey: process.env.HELIUS_API_KEY || undefined,
   rugcheckApiKey: process.env.RUGCHECK_API_KEY || undefined,
   tronscanApiKey: process.env.TRONSCAN_API_KEY || undefined,
+  /** Cryptomus crypto-billing merchant UUID + payment API key (self-serve key sales) */
+  cryptomusMerchantId: process.env.CRYPTOMUS_MERCHANT_ID || undefined,
+  cryptomusApiKey: process.env.CRYPTOMUS_API_KEY || undefined,
   /** cache TTL for a full scan result */
   cacheTtlMs: 30 * 60 * 1000,
   /** per-upstream request timeout */

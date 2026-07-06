@@ -34,6 +34,11 @@
   .price { color: var(--brand-strong); font-weight: 700; }
   .cta { margin-top: 16px; padding: 20px 22px; background: var(--brand-tint); border: 1px solid var(--border); border-radius: 14px; }
   .cta a { color: var(--brand-strong); font-weight: 600; }
+  .buyrow { display: flex; flex-wrap: wrap; gap: 10px; }
+  .buy { display: inline-flex; align-items: center; padding: 10px 18px; border-radius: 999px; font-size: 14px; font-weight: 600; color: #fff !important; background: var(--brand); border: 1px solid var(--brand); text-decoration: none; transition: background 0.15s ease; }
+  .buy:hover { background: var(--brand-strong); }
+  .buy.ghost { color: var(--brand-strong) !important; background: transparent; border-color: var(--border-strong); }
+  .buy.ghost:hover { background: #fff; border-color: var(--brand); }
   .chips { color: var(--muted); font-size: 13.5px; }
 </style>
 </head>
@@ -108,9 +113,15 @@
   </table>
 
   <div class="cta">
-    <p style="margin:0; color: var(--ink);"><strong>Get a key.</strong> Tell us what you're building and
-    we'll issue one &mdash; email <a href="mailto:hello@rugsonar.com">hello@rugsonar.com</a> or DM us on X.
-    Free keys are instant.</p>
+    <p style="margin:0 0 14px; color: var(--ink);"><strong>Get a key.</strong> Buy instantly with crypto (USDT),
+    or email us for a free key or custom volume.</p>
+    <div class="buyrow">
+      <a class="buy" href="/v1/checkout/indie">Buy Indie &mdash; $29/mo</a>
+      <a class="buy" href="/v1/checkout/pro">Buy Pro &mdash; $99/mo</a>
+      <a class="buy ghost" href="mailto:hello@rugsonar.com?subject=RugSonar%20API%20key">Free key / custom &rarr;</a>
+    </div>
+    <p style="margin:14px 0 0; font-size:13px; color:var(--dim);">Paid in USDT and other crypto via Cryptomus.
+    Your key is issued automatically the moment payment confirms.</p>
   </div>
 
   <p style="margin-top:34px; color: var(--dim); font-size:13px;">RugSonar output is automated technical

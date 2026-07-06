@@ -10,6 +10,7 @@ import { config } from './config.ts';
 import { renderOgCard } from './ogcard.ts';
 import { resolveTarget, scanToken } from './scan.ts';
 import { authenticateKey, bearerToken, checkAndMeter, getUsage } from './apikeys.ts';
+import { billingEnabled, createInvoice, verifyWebhook, handleWebhook, getOrder } from './billing.ts';
 
 const app = Fastify({ logger: true });
 const webDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'web');
@@ -74,6 +75,46 @@ async function getOrScan(chainId: string, address: string): Promise<ScanResult |
 }
 
 app.get('/healthz', async () => ({ ok: true }));
+
+// ── crypto billing (Cryptomus) — self-serve API-key purchases ─────────────
+// Start checkout: create an invoice and redirect the buyer to pay in crypto.
+app.get<{ Params: { tier: string } }>('/v1/checkout/:tier', async (req, reply) => {
+  const tier = req.params.tier;
+  if (tier !== 'indie' && tier !== 'pro') return reply.code(400).send({ error: 'tier must be "indie" or "pro"' });
+  if (!billingEnabled()) {
+    reply.header('content-type', 'text/html; charset=utf-8');
+    return reply.send(
+      '<!doctype html><meta charset="utf-8"><title>Checkout coming soon</title>' +
+      '<div style="font:16px/1.6 system-ui;max-width:520px;margin:12vh auto;padding:0 20px;text-align:center;color:#131722">' +
+      '<h2>Self-serve checkout is almost ready</h2>' +
+      '<p style="color:#59616f">Crypto payments are being activated. In the meantime, email ' +
+      '<a href="mailto:hello@rugsonar.com">hello@rugsonar.com</a> and we\'ll set you up with a key today.</p>' +
+      '<p><a href="/api.html">← Back to the API docs</a></p></div>',
+    );
+  }
+  try {
+    const { url } = await createInvoice(tier);
+    return reply.redirect(url);
+  } catch (err) {
+    app.log.error(err);
+    return reply.code(502).send({ error: 'Could not start checkout — try again or email hello@rugsonar.com' });
+  }
+});
+
+// Cryptomus payment webhook — verify signature, then issue the key on "paid".
+app.post('/v1/webhook/cryptomus', async (req, reply) => {
+  const body = req.body as Record<string, unknown> | undefined;
+  if (!body || !verifyWebhook(body)) return reply.code(403).send({ error: 'invalid signature' });
+  handleWebhook(body);
+  return reply.send({ ok: true }); // Cryptomus expects a 2xx to stop retrying
+});
+
+// Order status + one-time key reveal for the success page.
+app.get<{ Params: { orderId: string } }>('/v1/order/:orderId', async (req, reply) => {
+  const order = getOrder(req.params.orderId);
+  if (!order) return reply.code(404).send({ error: 'order not found' });
+  return order;
+});
 
 // caller's key usage — GET /v1/usage with Authorization: Bearer <key>
 app.get('/v1/usage', async (req, reply) => {

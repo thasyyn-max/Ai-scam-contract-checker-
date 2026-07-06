@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your RugSonar API key</title>
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#f7f8fa">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css">
+<style>
+  .paid { max-width: 620px; margin: 0 auto; padding: clamp(40px, 9vw, 96px) 20px; text-align: center; }
+  .paid img.lockup { height: 34px; width: auto; margin-bottom: 34px; }
+  .paid h1 { font-size: 24px; font-weight: 650; letter-spacing: -0.3px; margin-bottom: 8px; }
+  .paid p { color: var(--muted); font-size: 15px; line-height: 1.65; margin: 0 auto 8px; max-width: 46ch; }
+  .spin { width: 30px; height: 30px; border: 3px solid var(--border-strong); border-top-color: var(--brand); border-radius: 50%; margin: 26px auto; animation: sp 0.8s linear infinite; }
+  @keyframes sp { to { transform: rotate(360deg); } }
+  .keybox { margin: 22px auto 6px; max-width: 520px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 12px; padding: 16px 18px; font-family: var(--mono); font-size: 14px; color: var(--ink); word-break: break-all; text-align: left; }
+  .copy { margin-top: 12px; display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 999px; font-size: 14px; font-weight: 600; color: #fff; background: var(--brand); border: none; cursor: pointer; }
+  .copy:hover { background: var(--brand-strong); }
+  .warn { color: var(--brand-strong); font-weight: 600; }
+  .muted-note { color: var(--dim); font-size: 13px; margin-top: 26px; }
+  a { color: var(--brand-strong); }
+</style>
+</head>
+<body>
+<div class="paid">
+  <img class="lockup" src="/logo-full.svg" alt="RugSonar">
+  <div id="view">
+    <div class="spin"></div>
+    <h1>Confirming your payment…</h1>
+    <p>This can take a minute while the transaction settles on-chain. This page updates automatically — keep it open.</p>
+  </div>
+</div>
+<script>
+  const view = document.getElementById('view');
+  const order = new URLSearchParams(location.search).get('order');
+
+  function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+  function showKey(tier, key) {
+    view.innerHTML =
+      '<h1>You\'re in. 🎉</h1>' +
+      '<p>Your <strong>' + esc(tier) + '</strong> API key is ready. <span class="warn">Copy it now — it\'s shown only once.</span></p>' +
+      '<div class="keybox" id="k">' + esc(key) + '</div>' +
+      '<button class="copy" id="c">Copy key</button>' +
+      '<p class="muted-note">Use it as <code>Authorization: Bearer &lt;key&gt;</code>. See the <a href="/api.html">API docs</a>.</p>';
+    document.getElementById('c').onclick = () => {
+      navigator.clipboard.writeText(key).then(() => { document.getElementById('c').textContent = 'Copied ✓'; });
+    };
+  }
+  function showPaidNoKey() {
+    view.innerHTML =
+      '<h1>Payment confirmed ✓</h1>' +
+      '<p>Your key was already issued and shown once. If you didn\'t save it, email ' +
+      '<a href="mailto:hello@rugsonar.com">hello@rugsonar.com</a> with this order id and we\'ll help: <code>' + esc(order || '') + '</code></p>';
+  }
+  function showError(msg) {
+    view.innerHTML = '<h1>Hmm.</h1><p>' + esc(msg) + ' If you\'ve paid, email <a href="mailto:hello@rugsonar.com">hello@rugsonar.com</a> with your order id <code>' + esc(order || '') + '</code>.</p>';
+  }
+
+  async function poll() {
+    if (!order) return showError('No order reference in the link.');
+    try {
+      const res = await fetch('/v1/order/' + encodeURIComponent(order));
+      if (res.status === 404) return showError('We couldn\'t find that order.');
+      const o = await res.json();
+      if (o.status === 'paid') {
+        return o.key ? showKey(o.tier, o.key) : showPaidNoKey();
+      }
+    } catch (e) { /* keep polling */ }
+    setTimeout(poll, 4000);
+  }
+  poll();
+</script>
+</body>
+</html>
