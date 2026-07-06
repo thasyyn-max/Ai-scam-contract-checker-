@@ -116,6 +116,15 @@ app.get<{ Params: { orderId: string } }>('/v1/order/:orderId', async (req, reply
   return order;
 });
 
+// manual/concierge crypto payment details for the docs "Pay with USDT" panel
+app.get('/v1/pay-info', async () => ({
+  network: 'Tron (TRC-20)',
+  asset: 'USDT',
+  prices: { indie: 29, pro: 99 },
+  address: config.cryptoPayUsdtTrc20 ?? null,
+  contact: 'hello@rugsonar.com',
+}));
+
 // caller's key usage — GET /v1/usage with Authorization: Bearer <key>
 app.get('/v1/usage', async (req, reply) => {
   const token = bearerToken(req.headers.authorization);

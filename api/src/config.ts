@@ -23,6 +23,8 @@ export const config = {
   /** Cryptomus crypto-billing merchant UUID + payment API key (self-serve key sales) */
   cryptomusMerchantId: process.env.CRYPTOMUS_MERCHANT_ID || undefined,
   cryptomusApiKey: process.env.CRYPTOMUS_API_KEY || undefined,
+  /** Manual/concierge USDT (TRC-20) receive address shown on the docs "Pay with USDT" panel */
+  cryptoPayUsdtTrc20: process.env.CRYPTO_PAY_USDT_TRC20 || undefined,
   /** cache TTL for a full scan result */
   cacheTtlMs: 30 * 60 * 1000,
   /** per-upstream request timeout */

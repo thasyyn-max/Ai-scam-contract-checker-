@@ -39,6 +39,11 @@
   .buy:hover { background: var(--brand-strong); }
   .buy.ghost { color: var(--brand-strong) !important; background: transparent; border-color: var(--border-strong); }
   .buy.ghost:hover { background: #fff; border-color: var(--brand); }
+  .usdt { margin-top: 12px; }
+  .addr { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 10px; padding: 12px 14px; font-family: var(--mono); font-size: 13px; color: var(--ink); word-break: break-all; }
+  .addr button { margin-left: auto; padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #fff; background: var(--brand); border: none; cursor: pointer; }
+  .usteps { margin: 14px 0 0; padding-left: 20px; color: var(--muted); font-size: 14px; line-height: 1.75; }
+  .usteps b { color: var(--ink); }
   .chips { color: var(--muted); font-size: 13.5px; }
 </style>
 </head>
@@ -124,9 +129,41 @@
     Your key is issued automatically the moment payment confirms.</p>
   </div>
 
+  <h2>Prefer to pay by hand? USDT (TRC-20)</h2>
+  <p>Pay directly in USDT on Tron and we'll issue your key — no gateway, no account. Cheap fees, instant.</p>
+  <div id="usdtpanel" class="usdt"><p style="color:var(--dim)">Loading payment details…</p></div>
+
   <p style="margin-top:34px; color: var(--dim); font-size:13px;">RugSonar output is automated technical
   analysis, not financial advice, and never a guarantee of safety. See the
   <a href="/terms.html" style="color:var(--dim); text-decoration:underline;">terms &amp; disclaimer</a>.</p>
 </div>
+<script>
+  fetch('/v1/pay-info').then(function (r) { return r.json(); }).then(function (p) {
+    var el = document.getElementById('usdtpanel');
+    if (!el) return;
+    function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    var steps =
+      '<ol class="usteps">' +
+      '<li>Send <b>$' + p.prices.indie + '</b> (Indie) or <b>$' + p.prices.pro + '</b> (Pro) in <b>' +
+      esc(p.asset) + ' on ' + esc(p.network) + '</b>' + (p.address ? ' to the address above' : '') + '.</li>' +
+      '<li>Email <a href="mailto:' + esc(p.contact) + '?subject=USDT%20payment%20for%20RugSonar%20API">' +
+      esc(p.contact) + '</a> with your <b>transaction hash</b> and the tier you paid for.</li>' +
+      '<li>We confirm it on-chain and send you your <code>rsk_live_…</code> key.</li>' +
+      '</ol>';
+    if (p.address) {
+      el.innerHTML =
+        '<div class="addr"><span>' + esc(p.address) + '</span><button id="ac" type="button">Copy</button></div>' + steps;
+      document.getElementById('ac').onclick = function () {
+        navigator.clipboard.writeText(p.address).then(function () { document.getElementById('ac').textContent = 'Copied ✓'; });
+      };
+    } else {
+      el.innerHTML =
+        '<p style="margin:0 0 4px;color:var(--muted)">Email us and we\'ll send you the current USDT (TRC-20) address:</p>' + steps;
+    }
+  }).catch(function () {
+    var el = document.getElementById('usdtpanel');
+    if (el) el.innerHTML = '<p style="color:var(--muted)">To pay in USDT, email <a href="mailto:hello@rugsonar.com">hello@rugsonar.com</a>.</p>';
+  });
+</script>
 </body>
 </html>
