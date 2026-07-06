@@ -3,6 +3,12 @@
 # installed even in production; hence --include=dev on npm ci.
 FROM node:24-bookworm-slim
 
+# Fonts for server-side OG share-card rendering (sharp/librsvg). The slim image
+# ships no fonts, so the card's SVG text renders as tofu boxes (□) without this.
+# Liberation Sans is metric-compatible with Arial (the card's font-family).
+RUN apt-get update && apt-get install -y --no-install-recommends fontconfig fonts-liberation \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # manifests first for layer caching (workspaces: shared + api)
