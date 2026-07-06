@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RugSonar API — token risk scoring + plain-English explanations</title>
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#f7f8fa">
+<meta name="description" content="Embed RugSonar's token risk scanner in your bot, wallet, or dashboard. One score across 5 security sources plus a plain-English explanation — the only risk API that explains itself.">
+<meta name="robots" content="index,follow">
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css">
+<style>
+  .api { max-width: 760px; margin: 0 auto; padding: clamp(32px, 6vw, 68px) 20px 96px; }
+  .api .back { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); text-decoration: none; font-size: 14px; margin-bottom: 28px; }
+  .api .back:hover { color: var(--ink); }
+  .api .back img { height: 22px; width: auto; }
+  .api h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 8px; }
+  .api .lede { color: var(--ink); font-size: 17px; line-height: 1.6; margin-bottom: 8px; }
+  .api .sub { color: var(--muted); font-size: 15px; line-height: 1.6; margin-bottom: 34px; }
+  .api h2 { font-size: 19px; font-weight: 600; margin: 40px 0 12px; letter-spacing: -0.2px; }
+  .api p { color: var(--muted); font-size: 15px; line-height: 1.7; margin-bottom: 12px; }
+  .api strong { color: var(--ink); font-weight: 600; }
+  .api code { font-family: var(--mono); font-size: 13px; background: var(--brand-tint); color: var(--brand-strong); padding: 2px 6px; border-radius: 5px; }
+  .api pre { background: #0f1524; color: #e7ecf6; font-family: var(--mono); font-size: 12.5px; line-height: 1.6; padding: 16px 18px; border-radius: 12px; overflow-x: auto; margin: 12px 0 4px; }
+  .api pre code { background: none; color: inherit; padding: 0; }
+  .ep { display: inline-block; font-family: var(--mono); font-size: 13px; color: var(--ink); background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 6px 10px; margin: 4px 8px 4px 0; }
+  .ep b { color: var(--brand); }
+  table.tiers { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  table.tiers th, table.tiers td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--border); }
+  table.tiers th { color: var(--dim); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px; }
+  table.tiers td:first-child { font-weight: 600; color: var(--ink); }
+  .price { color: var(--brand-strong); font-weight: 700; }
+  .cta { margin-top: 16px; padding: 20px 22px; background: var(--brand-tint); border: 1px solid var(--border); border-radius: 14px; }
+  .cta a { color: var(--brand-strong); font-weight: 600; }
+  .chips { color: var(--muted); font-size: 13.5px; }
+</style>
+</head>
+<body>
+<div class="api">
+  <a class="back" href="/"><img src="/logo-full.svg" alt="RugSonar"></a>
+
+  <h1>RugSonar API</h1>
+  <p class="lede">Embed token risk scanning in your bot, wallet, or dashboard. One request returns a
+  0&ndash;100 score, the evidence behind it, and a plain-English explanation of what the contract owner
+  can do to a holder.</p>
+  <p class="sub">Every other risk API hands your users 30 cryptic boolean flags. RugSonar aggregates
+  five security sources into a single deterministic score <strong>and explains it</strong> &mdash; the one
+  thing none of the incumbents ship in an API.</p>
+
+  <h2>Base URL</h2>
+  <pre><code>https://rugsonar.com</code></pre>
+
+  <h2>Authentication</h2>
+  <p>Send your key as a bearer token. Without a key you share the public rate limit; a key gives you a
+  metered monthly quota and commercial use.</p>
+  <pre><code>Authorization: Bearer rsk_live_xxxxxxxxxxxxxxxx</code></pre>
+
+  <h2>Endpoints</h2>
+  <div>
+    <span class="ep"><b>GET</b> /v1/scan/:chain/:address</span>
+    <span class="ep"><b>GET</b> /v1/scan?address=</span>
+    <span class="ep"><b>GET</b> /v1/usage</span>
+  </div>
+  <p class="chips">Chains: <code>eth</code> <code>bsc</code> <code>base</code> <code>polygon</code>
+  <code>arbitrum</code> <code>optimism</code> <code>avalanche</code> <code>solana</code> <code>tron</code>.
+  Omit the chain and pass <code>?address=</code> to auto-detect from the address format.</p>
+
+  <h2>Example</h2>
+  <pre><code>curl https://rugsonar.com/v1/scan/eth/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2 \
+     -H "Authorization: Bearer rsk_live_xxxxxxxxxxxxxxxx"</code></pre>
+  <pre><code>{
+  "chain": "eth",
+  "chainName": "Ethereum",
+  "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+  "score": 85,
+  "verdict": "no-red-flags",
+  "findings": [
+    { "severity": "low", "title": "Single wallet holds outsized supply",
+      "evidence": "Top holder controls 24% of supply", "source": "goplus" }
+  ],
+  "facts": { "name": "Wrapped Ether", "symbol": "WETH", "sourceVerified": true, "...": "..." },
+  "checks": [ { "source": "etherscan", "ok": true }, "..." ],
+  "partial": false,
+  "aiExplanation": "WETH is a wrapped version of native Ether with no red flags...",
+  "scannedAt": "2026-07-06T06:20:00.000Z"
+}</code></pre>
+  <p><strong>Verdicts:</strong> <code>high-risk</code>, <code>risky</code>, <code>caution</code>,
+  <code>no-red-flags</code>. The score is deterministic &mdash; the AI only explains the findings, it never
+  changes the number. On unverified source the explanation is omitted.</p>
+
+  <h2>Usage &amp; limits</h2>
+  <p>Check your remaining quota any time:</p>
+  <pre><code>curl https://rugsonar.com/v1/usage -H "Authorization: Bearer rsk_live_..."
+{ "tier": "indie", "month": "2026-07", "used": 3410, "limit": 25000, "remaining": 21590 }</code></pre>
+  <p>Over quota returns <code>429</code> with the tier and limit. Quotas reset on the 1st (UTC).</p>
+
+  <h2>Pricing</h2>
+  <table class="tiers">
+    <thead><tr><th>Tier</th><th>Price</th><th>Scans / month</th><th>For</th></tr></thead>
+    <tbody>
+      <tr><td>Free</td><td class="price">$0</td><td>1,000</td><td>trying it out, hobby bots</td></tr>
+      <tr><td>Indie</td><td class="price">$29/mo</td><td>25,000</td><td>Telegram bots, small wallets</td></tr>
+      <tr><td>Pro</td><td class="price">$99/mo</td><td>150,000</td><td>dashboards, production apps</td></tr>
+      <tr><td>Custom</td><td class="price">talk to us</td><td>150,000+</td><td>exchanges, high volume</td></tr>
+    </tbody>
+  </table>
+
+  <div class="cta">
+    <p style="margin:0; color: var(--ink);"><strong>Get a key.</strong> Tell us what you're building and
+    we'll issue one &mdash; email <a href="mailto:hello@rugsonar.com">hello@rugsonar.com</a> or DM us on X.
+    Free keys are instant.</p>
+  </div>
+
+  <p style="margin-top:34px; color: var(--dim); font-size:13px;">RugSonar output is automated technical
+  analysis, not financial advice, and never a guarantee of safety. See the
+  <a href="/terms.html" style="color:var(--dim); text-decoration:underline;">terms &amp; disclaimer</a>.</p>
+</div>
+</body>
+</html>

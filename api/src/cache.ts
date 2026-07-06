@@ -8,7 +8,7 @@ import { config } from './config.ts';
 const dataDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'data');
 mkdirSync(dataDir, { recursive: true });
 
-const db = new DatabaseSync(join(dataDir, 'scans.db'));
+export const db = new DatabaseSync(join(dataDir, 'scans.db'));
 db.exec(`
   CREATE TABLE IF NOT EXISTS scan_cache (
     chain TEXT NOT NULL,

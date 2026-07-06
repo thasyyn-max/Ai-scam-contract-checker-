@@ -112,6 +112,10 @@ function shell() {
   const terms = el('a', null, 'Terms & disclaimer');
   terms.href = '/terms.html';
   footer.appendChild(terms);
+  footer.appendChild(document.createTextNode(' · '));
+  const apiLink = el('a', null, 'API for developers');
+  apiLink.href = '/api.html';
+  footer.appendChild(apiLink);
   wrap.appendChild(footer);
 
   app.appendChild(wrap);

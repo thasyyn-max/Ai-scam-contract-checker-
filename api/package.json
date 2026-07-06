@@ -8,7 +8,8 @@
     "start": "tsx src/server.ts",
     "build": "tsc --noEmit",
     "test": "node --import tsx --test test/*.test.ts",
-    "golden": "tsx test/golden-set.ts"
+    "golden": "tsx test/golden-set.ts",
+    "key": "tsx scripts/keys.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.92.0",
