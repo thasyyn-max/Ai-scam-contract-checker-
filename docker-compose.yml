@@ -14,6 +14,7 @@
 services:
   app:
     build: .
+    image: rugsonar-app
     restart: unless-stopped
     env_file: .env
     environment:
@@ -23,6 +24,16 @@ services:
       - scandata:/app/data
     expose:
       - "3000"
+
+  # Telegram bot — reuses the app image, calls the scanner over the internal
+  # network (no inbound ports). Idles quietly until TELEGRAM_BOT_TOKEN is set.
+  bot:
+    image: rugsonar-app
+    restart: unless-stopped
+    env_file: .env
+    command: npm run start -w bot
+    depends_on:
+      - app
 
   cloudflared:
     image: cloudflare/cloudflared:latest
