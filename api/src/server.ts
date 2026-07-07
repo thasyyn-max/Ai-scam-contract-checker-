@@ -15,6 +15,29 @@ import { billingEnabled, createInvoice, verifyWebhook, handleWebhook, getOrder }
 const app = Fastify({ logger: true });
 const webDir = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'web');
 
+// Baseline security headers on every response. CSP allows the inline scripts/styles
+// in the static pages and https token-logo images from external CDNs; everything
+// else is locked to same-origin.
+const SECURITY_HEADERS = {
+  'strict-transport-security': 'max-age=31536000; includeSubDomains',
+  'x-content-type-options': 'nosniff',
+  'x-frame-options': 'DENY',
+  'referrer-policy': 'strict-origin-when-cross-origin',
+  'permissions-policy': 'geolocation=(), microphone=(), camera=(), payment=(), usb=()',
+  'content-security-policy':
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline'; " +
+    "style-src 'self' 'unsafe-inline'; " +
+    "img-src 'self' data: https:; " +
+    "font-src 'self'; " +
+    "connect-src 'self'; " +
+    "frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+};
+app.addHook('onSend', async (_req, reply, payload) => {
+  reply.headers(SECURITY_HEADERS);
+  return payload;
+});
+
 // Rate-limit only the expensive scan/image routes — NOT static assets or the
 // permalink HTML, so a normal page load (many asset requests) never trips it.
 await app.register(rateLimit, { global: false });
